@@ -9,9 +9,6 @@ fn main() {
     firstElement = String::from(&h2[0..1]);
     h2.push_str(&firstElement);
     let mut h2_without = String::from(&h2[1..]);
-    let p8 = &h1_without;
-    p8.push_str(&h2_without);
-    println!("{}",p8);
     println!("{}",h1_without);
     println!("{}",h2_without);
     
