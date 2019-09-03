@@ -1,16 +1,34 @@
 fn main() {
-    let p8: [i32; 8] = [6,3,7,4,8,5,10,9];
-    let bit_key = "1010101010";
-    let mut h1 = String::from(&bit_key[0..5]);
-    let mut h2 = String::from(&bit_key[5..10]);
-    let mut firstElement = String::from(&h1[0..1]);
-    h1.push_str(&firstElement);
-    let mut h1_without = String::from(&h1[1..]);
-    firstElement = String::from(&h2[0..1]);
-    h2.push_str(&firstElement);
-    let mut h2_without = String::from(&h2[1..]);
-    println!("{}",h1_without);
-    println!("{}",h2_without);
+    let p8: [u8; 8] = [6,3,7,4,8,5,10,9];
+    let ten_bit: [bool; 10] = [true, false, true, false, false, false, false, false, true, false];
+    let permute_ten = permute_key(ten_bit);
+    println!("{:?}", permute_ten);
+    //let bit_key = key_to_string();
+    // let mut h1 = String::from(&bit_key[0..5]);
+    // let mut h2 = String::from(&bit_key[5..10]);
+    // let mut firstElement = String::from(&h1[0..1]);
+    // h1.push_str(&firstElement);
+    // let mut h1_without = String::from(&h1[1..]);
+    // firstElement = String::from(&h2[0..1]);
+    // h2.push_str(&firstElement);
+    // let mut h2_without = String::from(&h2[1..]);
+    // println!("{}",h1_without);
+    // println!("{}",h2_without);
     
 
 }
+
+fn permute_key(ten_bit: [bool; 10]) -> [bool; 10]{
+    let mut new_10_key: [bool; 10] = [false;10];
+    let p10: [usize; 10] = [3,5,2,7,4,10,1,9,8,6];
+    let mut i = 0;
+    for x in p10.iter(){
+        new_10_key[i] = ten_bit[*x-1];
+        i+=1;
+    }
+    return new_10_key;
+}
+
+// fn key_to_string() -> String{
+
+// }
