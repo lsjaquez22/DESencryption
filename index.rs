@@ -4,8 +4,17 @@ fn main() {
     let (first_five, second_five) : (&mut[bool], &mut[bool]) = permute_ten.split_at_mut(5);
     first_five.rotate_left(1);
     second_five.rotate_left(1);
-    let permute_eight = permute_eight_key(permute_ten);
-    println!("{:?}",permute_eight);
+    let first_key = permute_eight_key(permute_ten);
+
+    let (second_shift_first, second_shift_second) : (&mut[bool], &mut[bool]) = permute_ten.split_at_mut(5);
+    second_shift_first.rotate_left(2);
+    second_shift_second.rotate_left(2);
+
+    let second_key = permute_eight_key(permute_ten);
+
+    println!("{:?}", permute_ten);
+    println!("{:?}",first_key);
+    println!("{:?}", second_key);
     //let bit_key = key_to_string();
     // let mut h1 = String::from(&bit_key[0..5]);
     // let mut h2 = String::from(&bit_key[5..10]);
