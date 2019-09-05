@@ -20,16 +20,22 @@ fn main() {
 
     let mut xor_ep_first_key = xor_eigth_bits(e_p_plain, first_key);
     let (first_four_xor, second_four_xor) : (&mut[bool], &mut[bool]) = xor_ep_first_key.split_at_mut(4);
-    println!("PRUEBA - {:?}", first_four_xor);
-    println!("PRUEBA2 - {:?}", second_four_xor);
 
-    // println!("PRUEBA P4 - {:?}", permute_p4([true, false, false, false]));
-    // println!("PRUEBA XOR 4 - {:?}", xor_four_bits([false, false, false, true], [false, false, true, false]));
-    // println!("PRUEBA IP-1 - {:?}", permute_i_p_1([false, false, false, true, false, false, true, true]));
-    // println!("PRUEBA CONCATENET - {:?}", [first_four_xor, second_four_xor].concat());
+    let new_first_four_xor= permute_s(first_four_xor);
+    let new_second_four_xor = permute_s(second_four_xor);
+
+    let p4_plain = permute_p4([s0(new_first_four_xor), s1(new_second_four_xor)].concat());
     
-    // println!("{:?}",first_key);
-    // println!("{:?}", second_key);
+
+    let first_sw = xor_four_bits(p4_plain, second_four_plain);
+
+
+    // ROUND 2
+
+    // let e_p_plain_r2 = permute_e_p(p4_plain);
+
+    println!("PRUEBA FIRST SW - {:?}", first_sw);
+    println!("PRUEBA H1 - {:?}", second_four_plain);
 
 }
 
@@ -92,7 +98,7 @@ fn permute_i_p_1(eigth_bit_plain_text: [bool; 8]) -> [bool; 8]{
     return new_i_p_1;
 }
 
-fn permute_p4(four_bit_plain_text: [bool; 4]) -> [bool; 4]{
+fn permute_p4(four_bit_plain_text: std::vec::Vec<bool>) -> [bool; 4]{
     let mut new_p4: [bool; 4] = [false;4];
     // println!("{:?}", four_bit_plain_text);
     let p4: [usize; 4] = [2,4,3,1];
@@ -115,7 +121,7 @@ fn xor_eigth_bits(eigth_bits : [bool; 8], key_bits : [bool; 8]) -> [bool; 8] {
     return new_xor_eight;
 }
 
-fn xor_four_bits(first_four_bits : [bool; 4], second_four_bits : [bool; 4]) -> [bool; 4] {
+fn xor_four_bits(first_four_bits : [bool; 4], second_four_bits : &mut [bool]) -> [bool; 4] {
     let mut new_xor_four: [bool; 4] = [false;4];
     // println!("{:?}", four_bit_plain_text);
     let mut i = 0;
@@ -125,4 +131,53 @@ fn xor_four_bits(first_four_bits : [bool; 4], second_four_bits : [bool; 4]) -> [
     }
     return new_xor_four;
 }
+
+fn s0(first_four_xor: [bool; 4]) -> [bool; 2]{
+    let s0: [[bool;2];16] = [[false, true], [false, false], [true, true], [true, false], [true, true], [true, false], [false, true], [false, false], [false, false], [true, false], [false, true], [true, true], [true, true], [false, true], [false, false], [true, false]];
+    let mut pos=0;
+    if(first_four_xor[0] == true){
+        pos=pos+8
+    }
+    if(first_four_xor[1] == true){
+        pos=pos+4
+    }
+    if(first_four_xor[2] == true){
+        pos=pos+2
+    }
+    if(first_four_xor[3] == true){
+        pos=pos+1
+    }
+    return s0[pos]
+}
+
+fn s1(second_four_xor: [bool; 4]) -> [bool; 2]{
+    let s1: [[bool;2];16] = [[false, false], [false, true], [true, false], [true, true], [true, false], [false, false], [false, true], [true, true], [true, true], [false, false], [false, true], [false, false], [true, false], [false, true], [false, false], [true, true]];
+    let mut posS1=0;
+    if(second_four_xor[0] == true){
+        posS1=posS1+8
+    }
+    if(second_four_xor[1] == true){
+        posS1=posS1+4
+    }
+    if(second_four_xor[2] == true){
+        posS1=posS1+2
+    }
+    if(second_four_xor[3] == true){
+        posS1=posS1+1
+    }
+    // println!("pos - {:?}", posS1);
+    return s1[posS1]
+}
+
+fn permute_s(second_four_xor: &mut [bool]) -> [bool; 4]{
+    let mut new_permute_s: [bool; 4] = [false;4];
+    let p10: [usize; 4] = [1,4,2,3];
+    let mut i = 0;
+    for x in p10.iter(){
+        new_permute_s[i] = second_four_xor[*x-1];
+        i+=1;
+    }
+    return new_permute_s;
+}
+
 
