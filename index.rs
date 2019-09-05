@@ -27,12 +27,12 @@ fn main() {
     let p4_plain = permute_p4([s0(new_first_four_xor), s1(new_second_four_xor)].concat());
     
 
-    let first_sw = xor_four_bits(p4_plain, second_four_plain);
+    let mut first_sw = xor_four_bits(p4_plain, second_four_plain);
 
 
     // ROUND 2
 
-    // let e_p_plain_r2 = permute_e_p(p4_plain);
+    let e_p_plain_r2 = permute_e_p(first_sw.as_mut());
 
     println!("PRUEBA FIRST SW - {:?}", first_sw);
     println!("PRUEBA H1 - {:?}", second_four_plain);
