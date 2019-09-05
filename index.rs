@@ -1,42 +1,42 @@
 fn main() {
     let ten_bit: [bool; 10] = [true, true, false, false, false, true, true, true, true, false];
     let plain_text : [bool;8] = [false, false, true, false, true, false, false, false];
+
+    // KEYS
+
     let mut permute_ten = permute_ten_key(ten_bit);
     let (first_five, second_five) : (&mut[bool], &mut[bool]) = permute_ten.split_at_mut(5);
     first_five.rotate_left(1);
     second_five.rotate_left(1);
     let first_key = permute_eight_key(permute_ten);
-
     let (second_shift_first, second_shift_second) : (&mut[bool], &mut[bool]) = permute_ten.split_at_mut(5);
     second_shift_first.rotate_left(2);
     second_shift_second.rotate_left(2);
-
     let second_key = permute_eight_key(permute_ten);
+
+    // ROUND 1
 
     let mut permute_ip_plain = permute_i_p(plain_text);
     let (first_four_plain, second_four_plain) : (&mut[bool], &mut[bool]) = permute_ip_plain.split_at_mut(4);
-
     let e_p_plain = permute_e_p(second_four_plain);
-
     let mut xor_ep_first_key = xor_eigth_bits(e_p_plain, first_key);
     let (first_four_xor, second_four_xor) : (&mut[bool], &mut[bool]) = xor_ep_first_key.split_at_mut(4);
-
     let new_first_four_xor= permute_s(first_four_xor);
     let new_second_four_xor = permute_s(second_four_xor);
-
     let p4_plain = permute_p4([s0(new_first_four_xor), s1(new_second_four_xor)].concat());
-    
-
     let mut first_sw = xor_four_bits(p4_plain, second_four_plain);
-
 
     // ROUND 2
 
     let e_p_plain_r2 = permute_e_p(first_sw.as_mut());
-
-    println!("PRUEBA FIRST SW - {:?}", first_sw);
-    println!("PRUEBA H1 - {:?}", second_four_plain);
-
+    let mut xor_ep_k2 = xor_eigth_bits(e_p_plain_r2, second_key);
+    let (first_four_xor_r2, second_four_xor_r2) : (&mut[bool], &mut[bool]) = xor_ep_k2.split_at_mut(4);
+    let new_first_four_xor_r2= permute_s(first_four_xor_r2);
+    let new_second_four_xor_r2 = permute_s(second_four_xor_r2);
+    let p4_plain_2 = permute_p4([s0(new_first_four_xor_r2), s1(new_second_four_xor_r2)].concat());
+    let mut first_ip_1 = xor_four_bits(p4_plain_2, second_four_plain);
+    let cipher = permute_i_p_1([first_ip_1, first_sw].concat());
+    println!("CIPHER - {:?}", cipher);
 }
 
 fn permute_ten_key(ten_bit: [bool; 10]) -> [bool; 10]{
@@ -86,7 +86,7 @@ fn permute_i_p(eigth_bit_plain_text: [bool; 8]) -> [bool; 8]{
     return new_i_p;
 }
 
-fn permute_i_p_1(eigth_bit_plain_text: [bool; 8]) -> [bool; 8]{
+fn permute_i_p_1(eigth_bit_plain_text: std::vec::Vec<bool>) -> [bool; 8]{
     let mut new_i_p_1: [bool; 8] = [false;8];
     // println!("{:?}", eigth_bit_plain_text);
     let i_p_1: [usize; 8] = [4,1,3,5,7,2,8,6];
