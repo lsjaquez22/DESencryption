@@ -5,20 +5,28 @@ fn main() {
     // KEYS
 
     let mut permute_ten = permute_ten_key(ten_bit);
-    let (first_five, second_five) : (&mut[bool], &mut[bool]) = permute_ten.split_at_mut(5);
+    let mut first_key = get_first_key(permute_ten.as_mut());
+    let mut second_key = get_second_key(permute_ten.as_mut());
+    
+    //encrypt
+    let cipher_text = encrypt(plain_text, first_key,second_key);
+    println!("{:?}", cipher_text);
+}
+
+fn get_first_key(ten_bit: &mut[bool]) -> [bool; 8] {
+    let (first_five, second_five) : (&mut[bool], &mut[bool]) = ten_bit.split_at_mut(5);
     first_five.rotate_left(1);
     second_five.rotate_left(1);
-    let first_key = permute_eight_key(permute_ten);
-    let (second_shift_first, second_shift_second) : (&mut[bool], &mut[bool]) = permute_ten.split_at_mut(5);
+    let first_key = permute_eight_key(ten_bit);
+    return first_key;
+}
+
+fn get_second_key(ten_bit: &mut[bool]) -> [bool; 8] {
+    let (second_shift_first, second_shift_second) : (&mut[bool], &mut[bool]) = ten_bit.split_at_mut(5);
     second_shift_first.rotate_left(2);
     second_shift_second.rotate_left(2);
-    let second_key = permute_eight_key(permute_ten);
-    // Encryption
-    // ROUND 1
-
-    encrypt(plain_text, first_key,second_key);
-
-    encrypt(cipher, second_key, first_key);
+    let second_key = permute_eight_key(ten_bit);
+    return second_key;
 }
 
 fn permute_ten_key(ten_bit: [bool; 10]) -> [bool; 10]{
@@ -32,7 +40,7 @@ fn permute_ten_key(ten_bit: [bool; 10]) -> [bool; 10]{
     return new_10_key;
 }
 
-fn permute_eight_key(ten_bit: [bool; 10]) -> [bool; 8]{
+fn permute_eight_key(ten_bit: &mut[bool]) -> [bool; 8]{
     let mut new_8_key: [bool; 8] = [false;8];
     // println!("{:?}", ten_bit);
     let p8: [usize; 8] = [6,3,7,4,8,5,10,9];
@@ -209,20 +217,15 @@ fn permute_s(second_four_xor: &mut [bool]) -> [bool; 4]{
     return new_permute_s;
 }
 
-fn encrypt(plain_text: [bool;8], first_key:[bool;8], second_key:[bool;8]){
+fn encrypt(plain_text: [bool;8], first_key:[bool;8], second_key:[bool;8]) -> [bool; 8]{
     let mut permute_ip_plain = permute_i_p(plain_text);
     let (first_four_plain, second_four_plain) : (&mut[bool], &mut[bool]) = permute_ip_plain.split_at_mut(4);
     let mut function_first_key = fkey(first_four_plain, second_four_plain, first_key);
-    println!("{:?}", function_first_key);
     // ROUND 2
-    let mut plain = [second_four_plain,function_first_key.as_mut()].concat();
-    let (sec_itr_firs, sec_itr_sec) : (&mut[bool], &mut[bool]) = plain.split_at_mut(4);
-    println!("{:?}", sec_itr_sec);
-    let mut function_second_key = fkey(sec_itr_firs, sec_itr_sec, second_key);
-    println!("{:?}", function_second_key);
+    let mut function_second_key = fkey(second_four_plain, function_first_key.as_mut(), second_key);
     
     let cipher = permute_i_p_1([function_second_key.as_mut(), function_first_key.as_mut()].concat());
-    println!("{:?}", cipher);
+    return cipher;
 }
 
 fn fkey(first_plain: &mut[bool], sec_plain: &mut[bool], key:[bool;8]) -> [bool; 4] {
