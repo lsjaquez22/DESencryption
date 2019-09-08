@@ -1,7 +1,7 @@
 fn main() {
     let ten_bit: [bool; 10] = [true, false, false, true, true, false, false, true, false, false];
     let plain_text : [bool;8] = [false, false, false, false, true, false, true, false];
-    let cipher : [bool;8]= [true, false, false, false, true, false, true, false];
+    let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
     // KEYS
 
     let mut permute_ten = permute_ten_key(ten_bit);
@@ -13,7 +13,6 @@ fn main() {
     second_shift_first.rotate_left(2);
     second_shift_second.rotate_left(2);
     let second_key = permute_eight_key(permute_ten);
-
     // Encryption
     // ROUND 1
 
@@ -47,7 +46,6 @@ fn permute_eight_key(ten_bit: [bool; 10]) -> [bool; 8]{
 
 fn permute_e_p(four_bit_plain_text: &mut[bool]) -> [bool; 8]{
     let mut new_e_p: [bool; 8] = [false;8];
-    // println!("{:?}", four_bit_plain_text);
     let e_p: [usize; 8] = [4,1,2,3,2,3,4,1];
     let mut i = 0;
     for x in e_p.iter(){
@@ -115,41 +113,89 @@ fn xor_four_bits(first_four_bits : [bool; 4], second_four_bits : &mut [bool]) ->
     return new_xor_four;
 }
 
-fn s0(first_four_xor: [bool; 4]) -> [bool; 2]{
-    let s0: [[bool;2];16] = [[false, true], [false, false], [true, true], [true, false], [true, true], [true, false], [false, true], [false, false], [false, false], [true, false], [false, true], [true, true], [true, true], [false, true], [false, false], [true, false]];
-    let mut pos=0;
-    if(first_four_xor[0] == true){
-        pos=pos+8
+fn s0(first_four_xor: &mut[bool]) -> [bool; 2]{
+    let mut s0: [bool;2] = [false;2];
+    if(!first_four_xor[0]&&!first_four_xor[3]){
+        if(!first_four_xor[1]&&!first_four_xor[2]){
+            s0[1]=true;
+        } else if(first_four_xor[1]&&!first_four_xor[2]){
+            s0[0]=true;
+            s0[1]=true;
+        } else if(first_four_xor[1]&&first_four_xor[2]){
+            s0[0]=true;
+        }
+    } else if(!first_four_xor[0]&&first_four_xor[3]){
+        if(!first_four_xor[1]&&!first_four_xor[2]){
+            s0[0]=true;
+            s0[1]=true;
+        } else if(!first_four_xor[1]&&first_four_xor[2]){
+            s0[0]=true;
+        } else if(first_four_xor[1]&&!first_four_xor[2]){
+            s0[1]=true;
+        } 
+    } else if(first_four_xor[0]&&!first_four_xor[3]){
+        if(!first_four_xor[1]&&first_four_xor[2]){
+            s0[0]=true;
+        } else if(first_four_xor[1]&&!first_four_xor[2]){
+            s0[1]=true;
+        } else if(first_four_xor[1]&&first_four_xor[2]){
+            s0[0]=true;
+            s0[1]=true;
+        }
+    } else if(first_four_xor[0]&&first_four_xor[3]){
+        if(!first_four_xor[1]&&!first_four_xor[2]){
+            s0[0]=true;
+            s0[1]=true;
+        } else if(!first_four_xor[1]&&first_four_xor[2]){
+            s0[1]=true;
+        } else if(first_four_xor[1]&&!first_four_xor[2]){
+            s0[0]=true;
+            s0[1]=true;
+        } else if(first_four_xor[1]&&first_four_xor[2]){
+            s0[0]=true;
+        }
     }
-    if(first_four_xor[1] == true){
-        pos=pos+4
-    }
-    if(first_four_xor[2] == true){
-        pos=pos+2
-    }
-    if(first_four_xor[3] == true){
-        pos=pos+1
-    }
-    return s0[pos]
+    return s0;
 }
 
-fn s1(second_four_xor: [bool; 4]) -> [bool; 2]{
-    let s1: [[bool;2];16] = [[false, false], [false, true], [true, false], [true, true], [true, false], [false, false], [false, true], [true, true], [true, true], [false, false], [false, true], [false, false], [true, false], [false, true], [false, false], [true, true]];
-    let mut posS1=0;
-    if(second_four_xor[0] == true){
-        posS1=posS1+8
+fn s1(second_four_xor: &mut[bool]) -> [bool; 2]{
+    let mut s1: [bool;2] = [false;2];
+    if(!second_four_xor[0]&&!second_four_xor[3]){
+        if(!second_four_xor[1]&&second_four_xor[2]){
+            s1[1]=true;
+        } else if(second_four_xor[1]&&!second_four_xor[2]){
+            s1[0]=true;
+        } else if(second_four_xor[1]&&second_four_xor[2]){
+            s1[0]=true;
+            s1[1]=true;
+        }
+    } else if(!second_four_xor[0]&&second_four_xor[3]){
+        if(!second_four_xor[1]&&!second_four_xor[2]){
+            s1[0]=true;
+        } else if(second_four_xor[1]&&!second_four_xor[2]){
+            s1[1]=true;
+        } else if(second_four_xor[1]&&second_four_xor[2]){
+            s1[0]=true;
+            s1[1]=true;
+        }
+    } else if(second_four_xor[0]&&!second_four_xor[3]){
+        if(!second_four_xor[1]&&!second_four_xor[2]){
+            s1[0]=true;
+            s1[1]=true;
+        } else if(second_four_xor[1]&&!second_four_xor[2]){
+            s1[1]=true;
+        }
+    } else if(second_four_xor[0]&&second_four_xor[3]){
+        if(!second_four_xor[1]&&!second_four_xor[2]){
+            s1[0]=true;
+        } else if(!second_four_xor[1]&&second_four_xor[2]){
+            s1[1]=true;
+        } else if(second_four_xor[1]&&second_four_xor[2]){
+            s1[0]=true;
+            s1[1]=true;
+        }
     }
-    if(second_four_xor[1] == true){
-        posS1=posS1+4
-    }
-    if(second_four_xor[2] == true){
-        posS1=posS1+2
-    }
-    if(second_four_xor[3] == true){
-        posS1=posS1+1
-    }
-    // println!("pos - {:?}", posS1);
-    return s1[posS1]
+    return s1;
 }
 
 fn permute_s(second_four_xor: &mut [bool]) -> [bool; 4]{
@@ -166,24 +212,26 @@ fn permute_s(second_four_xor: &mut [bool]) -> [bool; 4]{
 fn encrypt(plain_text: [bool;8], first_key:[bool;8], second_key:[bool;8]){
     let mut permute_ip_plain = permute_i_p(plain_text);
     let (first_four_plain, second_four_plain) : (&mut[bool], &mut[bool]) = permute_ip_plain.split_at_mut(4);
-    let e_p_plain = permute_e_p(second_four_plain);
-    let mut xor_ep_first_key = xor_eigth_bits(e_p_plain, first_key);
-    let (first_four_xor, second_four_xor) : (&mut[bool], &mut[bool]) = xor_ep_first_key.split_at_mut(4);
-    let new_first_four_xor= permute_s(first_four_xor);
-    let new_second_four_xor = permute_s(second_four_xor);
-    let p4_plain = permute_p4([s0(new_first_four_xor), s1(new_second_four_xor)].concat());
-    let mut first_sw = xor_four_bits(p4_plain, second_four_plain);
-
+    let mut function_first_key = fkey(first_four_plain, second_four_plain, first_key);
+    println!("{:?}", function_first_key);
     // ROUND 2
-
-    let e_p_plain_r2 = permute_e_p(first_sw.as_mut());
-    let mut xor_ep_k2 = xor_eigth_bits(e_p_plain_r2, second_key);
-    let (first_four_xor_r2, second_four_xor_r2) : (&mut[bool], &mut[bool]) = xor_ep_k2.split_at_mut(4);
-    let new_first_four_xor_r2= permute_s(first_four_xor_r2);
-    let new_second_four_xor_r2 = permute_s(second_four_xor_r2);
-    let p4_plain_2 = permute_p4([s0(new_first_four_xor_r2), s1(new_second_four_xor_r2)].concat());
-    let mut first_ip_1 = xor_four_bits(p4_plain_2, second_four_plain);
-    let cipher = permute_i_p_1([first_ip_1, first_sw].concat());
-    println!("CIPHER - {:?}", cipher);
+    let mut plain = [second_four_plain,function_first_key.as_mut()].concat();
+    let (sec_itr_firs, sec_itr_sec) : (&mut[bool], &mut[bool]) = plain.split_at_mut(4);
+    println!("{:?}", sec_itr_sec);
+    let mut function_second_key = fkey(sec_itr_firs, sec_itr_sec, second_key);
+    println!("{:?}", function_second_key);
+    
+    let cipher = permute_i_p_1([function_second_key.as_mut(), function_first_key.as_mut()].concat());
+    println!("{:?}", cipher);
 }
 
+fn fkey(first_plain: &mut[bool], sec_plain: &mut[bool], key:[bool;8]) -> [bool; 4] {
+    let e_p_plain = permute_e_p(sec_plain);
+    let mut xor_ep_first_key = xor_eigth_bits(e_p_plain, key);
+    let (first_four_xor, second_four_xor) : (&mut[bool], &mut[bool]) = xor_ep_first_key.split_at_mut(4);
+    let mut s0_r1 = s0(first_four_xor);
+    let mut s1_r1 = s1(second_four_xor);
+    let p4_plain = permute_p4([s0_r1, s1_r1].concat());
+    let mut first_sw = xor_four_bits(p4_plain, first_plain);
+    return first_sw;
+}
