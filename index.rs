@@ -1,16 +1,63 @@
-fn main() {
-    let ten_bit: [bool; 10] = [true, false, false, true, true, false, false, true, false, false];
-    let plain_text : [bool;8] = [false, false, false, false, true, false, true, false];
-    let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
-    // KEYS
+use std::thread;
+use std::error::Error;
+use std::fs::File;
+use std::io::BufReader;
+use std::io::prelude::*;
+use std::path::Path;
 
-    let mut permute_ten = permute_ten_key(ten_bit);
-    let mut first_key = get_first_key(permute_ten.as_mut());
-    let mut second_key = get_second_key(permute_ten.as_mut());
+fn main() {
+
+    let fine_name = "plainCipher.txt";
+
+    // Open the path in read-only mode, returns `io::Result<File>`
+    let file = File::open(fine_name).unwrap();
+
+    let reader = BufReader::new(file);
     
-    //encrypt
-    let cipher_text = encrypt(plain_text, first_key,second_key);
-    println!("{:?}", cipher_text);
+    for line in reader.lines() {
+        
+            let mut string = line.unwrap();
+            let v: Vec<&str> = string.split(',').collect();
+            let plain = convert_bool(v[0]);
+            let cipher = convert_bool(v[1]);
+            for i in 0..1024{
+                let ten_bit: [bool; 10] = generate_key(i);
+                let plain_text : [bool;8] = plain;
+                let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
+                // KEYS
+
+                let mut permute_ten = permute_ten_key(ten_bit);
+                let mut first_key = get_first_key(permute_ten.as_mut());
+                let mut second_key = get_second_key(permute_ten.as_mut());
+                    
+                    //encrypt
+                let cipher_text = encrypt(plain_text, first_key,second_key);
+                if(cipher_text == cipher){
+                    println!("Llave encontrada");
+                    println!("CIPHER - {:?}", cipher_text);
+                    println!("CIPHER - {:?}", i);
+                }
+            }
+        // let handle_threads = thread::spawn(move || {
+        //     // println!("{:?} converts to {:?}", plain, cipher);
+        //     // let ten_bit: [bool; 10] = [true, false, false, true, true, false, false, true, false, false];
+        //     let ten_bit: [bool; 10] = brute_force();
+        //     let plain_text : [bool;8] = plain;
+        //     let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
+        //     // KEYS
+
+        //     let mut permute_ten = permute_ten_key(ten_bit);
+        //     let mut first_key = get_first_key(permute_ten.as_mut());
+        //     let mut second_key = get_second_key(permute_ten.as_mut());
+            
+        //     //encrypt
+        //     let cipher_text = encrypt(plain_text, first_key,second_key);
+        //     println!("CIPHER - {:?}", cipher_text);
+        // });
+    }
+
+    
+
 }
 
 fn get_first_key(ten_bit: &mut[bool]) -> [bool; 8] {
@@ -237,4 +284,32 @@ fn fkey(first_plain: &mut[bool], sec_plain: &mut[bool], key:[bool;8]) -> [bool; 
     let p4_plain = permute_p4([s0_r1, s1_r1].concat());
     let mut first_sw = xor_four_bits(p4_plain, first_plain);
     return first_sw;
+}
+
+fn convert_bool(string: &str) -> [bool; 8] {
+    let mut arr: [bool;8]=[false;8];
+    for (i, a) in string.chars().enumerate() {
+        if a == '1' {
+            arr[i] = true;
+        } else {
+            arr[i] = false;
+        }
+    }
+    return arr;
+}
+
+fn generate_key(key:u32) -> [bool; 10]{
+    let mut temp_key: [bool; 10] = [false;10];
+    let x = key;
+    let y = format!("{:b}", x);
+    let mut w : Vec<char> = y.chars().collect();
+    while(w.len() < 10){
+        w.insert(0,'0');
+    }
+    for x in 0..10 {
+        if(w[x]=='1'){
+            temp_key[x] = true;
+        }
+    }
+    return temp_key;
 }
