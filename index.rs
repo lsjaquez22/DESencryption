@@ -310,11 +310,20 @@ fn permute_s(second_four_xor: &mut [bool]) -> [bool; 4]{
 
 fn encrypt(plain_text: [bool;8], first_key:[bool;8], second_key:[bool;8]) -> [bool; 8]{
     let mut permute_ip_plain = permute_i_p(plain_text);
+    let permute_ip_plain_string: String = convert_string(permute_ip_plain).into_iter().collect();
+    println!("IP - {}", permute_ip_plain_string);
     let (first_four_plain, second_four_plain) : (&mut[bool], &mut[bool]) = permute_ip_plain.split_at_mut(4);
     let mut function_first_key = fkey(first_four_plain, second_four_plain, first_key);
+    let function_first_key_string: String = convert_string_fkey(function_first_key).into_iter().collect();
+    println!("fKey1 - {}", function_first_key_string);
     // ROUND 2
+    let sw: String = convert_vect_string_eigth([second_four_plain.as_mut(), function_first_key.as_mut()].concat()).into_iter().collect();
+    println!("SW - {}", sw);
     let mut function_second_key = fkey(second_four_plain, function_first_key.as_mut(), second_key);
-    
+    let function_sec_key_string: String = convert_string_fkey(function_second_key).into_iter().collect();
+    println!("fKey2 - {}", function_sec_key_string);
+    let pre_ip_1: String = convert_vect_string_eigth([function_second_key.as_mut(), function_first_key.as_mut()].concat()).into_iter().collect();
+    println!("pre_ip_1 - {}", pre_ip_1);
     let cipher = permute_i_p_1([function_second_key.as_mut(), function_first_key.as_mut()].concat());
     return cipher;
 }
@@ -406,4 +415,28 @@ mod simple_user_input {
         }
         input.trim().to_string()
     }
+}
+
+fn convert_string_fkey(text:[bool; 4]) ->  [char; 4] {
+    let mut arr: [char; 4] =['0';4];
+    for x in 0..4{
+        if(text[x]==true){
+            arr[x]='1'
+        }else{
+            arr[x]='0'
+        }
+    }
+    return arr;
+}
+
+fn convert_vect_string_eigth(vector: std::vec::Vec<bool>) -> [char; 8]{
+    let mut arr: [char; 8] =['0';8];
+    for x in 0..8{
+        if(vector[x]==true){
+            arr[x]='1'
+        }else{
+            arr[x]='0'
+        }
+    }
+    return arr;
 }
