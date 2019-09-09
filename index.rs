@@ -4,81 +4,104 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
 use std::path::Path;
+use simple_user_input::get_input;
 
 fn main() {
 
-    let fine_name = "plainCipher.txt";
+    println!("1 - Encriptar");
+    println!("2 - Desencriptar");
+    println!("3 - Fuerza bruta");
+    let input: String = get_input("Seleccione una opcion...");
+    if(input=="1"){
+        let input_plain_text: String = get_input("Plain text: ");
+        let input_key: String = get_input("Key: ");
 
-    // Open the path in read-only mode, returns `io::Result<File>`
-    let file = File::open(fine_name).unwrap();
+        let mut permute_ten = permute_ten_key(convert_bool_key(&input_key));
+        let mut first_key = get_first_key(permute_ten.as_mut());
+        let mut second_key = get_second_key(permute_ten.as_mut());
+        //encrypt
+        let cipher_text = encrypt(convert_bool(&input_plain_text), first_key,second_key);
+        let cipher_text_number: String = convert_string(cipher_text).into_iter().collect();
+        println!("Ciphertext - {}", cipher_text_number);
 
-    let reader = BufReader::new(file);
-    
-    for line in reader.lines() {
+    }else if(input=="2"){
+        let input_plain_text: String = get_input("Ciphertext: ");
+        let input_key: String = get_input("Key: ");
+
+        let mut permute_ten = permute_ten_key(convert_bool_key(&input_key));
+        let mut first_key = get_first_key(permute_ten.as_mut());
+        let mut second_key = get_second_key(permute_ten.as_mut());
+        //encrypt
+        let cipher_text = encrypt(convert_bool(&input_plain_text),second_key, first_key);
+        let cipher_text_number: String = convert_string(cipher_text).into_iter().collect();
+        println!("Plain text - {}", cipher_text_number);
+    }else if(input=="3"){
+        let fine_name = "plainCipher.txt";
+
+        // Open the path in read-only mode, returns `io::Result<File>`
+        let file = File::open(fine_name).unwrap();
+
+        let reader = BufReader::new(file);
+
+        let mut keys = vec![];
         
+        for (j, line) in reader.lines().enumerate() {
+            
             let mut string = line.unwrap();
-            let v: Vec<&str> = string.split(',').collect();
+            let v: Vec<&str> = string.split('/').collect();
             let plain = convert_bool(v[0]);
             let cipher = convert_bool(v[1]);
             let mut i=0;
-            while i<1024{
-                let ten_bit: [bool; 10] = generate_key(i);
-                let plain_text : [bool;8] = plain;
-                //let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
-                // KEYS
-                let mut permute_ten = permute_ten_key(ten_bit);
-                let mut first_key = get_first_key(permute_ten.as_mut());
-                let mut second_key = get_second_key(permute_ten.as_mut());
-                //encrypt
-                let cipher_text = encrypt(plain_text, first_key,second_key);
-                if(cipher_text == cipher){
-                    println!("Llave encontrada");
-                    println!("PLAIN - {:?}", plain_text);
-                    println!("CIPHER - {:?}", cipher_text);
-                    println!("Key - {:?}", generate_key(i));
-                    println!("Key - {:?}", i);
-                    println!("\n");
-                    i=1025;
+            if j == 0 { 
+                while i<1024{
+                    let ten_bit: [bool; 10] = generate_key(i);
+                    let plain_text : [bool;8] = plain;
+                    // KEYS
+                    let mut permute_ten = permute_ten_key(ten_bit);
+                    let mut first_key = get_first_key(permute_ten.as_mut());
+                    let mut second_key = get_second_key(permute_ten.as_mut());
+                    //encrypt
+                    let cipher_text = encrypt(plain_text, first_key,second_key);
+                    if(cipher_text == cipher){
+                        keys.push(i);
+                        // println!("Llave encontrada");
+                        // println!("PLAIN - {:?}", plain_text);
+                        // println!("CIPHER - {:?}", cipher_text);
+                        // println!("Key - {:?}", generate_key(i));
+                        // println!("Key - {:?}", i);
+                        // println!("{}", string);
+                        // println!("\n");
+                        i=i+1;
+                    }
+                    i=i+1;
                 }
-                i=i+1;
+            } else {
+                let mut keys_to_remove = vec![];
+                for (i, key) in keys.iter().enumerate() {
+                    let ten_bit: [bool; 10] = generate_key(*key);
+                    let plain_text : [bool;8] = plain;
+                    //let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
+                    // KEYS
+                    let mut permute_ten = permute_ten_key(ten_bit);
+                    let mut first_key = get_first_key(permute_ten.as_mut());
+                    let mut second_key = get_second_key(permute_ten.as_mut());
+                    //encrypt
+                    let cipher_text = encrypt(plain_text, first_key,second_key);
+                    if(cipher_text != cipher){
+                        keys_to_remove.push(i);
+                    }
+                }
+                for (index, i) in keys_to_remove.iter().enumerate(){
+                    keys.remove(*i-index);
+                }
             }
-            // for i in 0..1024{
-            //     let ten_bit: [bool; 10] = generate_key(i);
-            //     let plain_text : [bool;8] = plain;
-            //     let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
-            //     // KEYS
-            //     let mut permute_ten = permute_ten_key(ten_bit);
-            //     let mut first_key = get_first_key(permute_ten.as_mut());
-            //     let mut second_key = get_second_key(permute_ten.as_mut());
-            //     //encrypt
-            //     let cipher_text = encrypt(plain_text, first_key,second_key);
-            //     if(cipher_text == cipher){
-            //         println!("Llave encontrada");
-            //         println!("CIPHER - {:?}", cipher_text);
-            //         println!("Key - {:?}", i);
-            //         break()
-            //     }
-            // }
-        // let handle_threads = thread::spawn(move || {
-        //     // println!("{:?} converts to {:?}", plain, cipher);
-        //     // let ten_bit: [bool; 10] = [true, false, false, true, true, false, false, true, false, false];
-        //     let ten_bit: [bool; 10] = brute_force();
-        //     let plain_text : [bool;8] = plain;
-        //     let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
-        //     // KEYS
-
-        //     let mut permute_ten = permute_ten_key(ten_bit);
-        //     let mut first_key = get_first_key(permute_ten.as_mut());
-        //     let mut second_key = get_second_key(permute_ten.as_mut());
-            
-        //     //encrypt
-        //     let cipher_text = encrypt(plain_text, first_key,second_key);
-        //     println!("CIPHER - {:?}", cipher_text);
-        // });
+        }
+        // println!("{:?}", keys);
+        // println!("{:?}", generate_key(keys[0]));
+        let key_number: String = convert_string_key(generate_key(keys[0])).into_iter().collect();
+        println!("Key - {}", key_number);
     }
-
-    
-
+    //generate_key(keys)
 }
 
 fn get_first_key(ten_bit: &mut[bool]) -> [bool; 8] {
@@ -319,6 +342,42 @@ fn convert_bool(string: &str) -> [bool; 8] {
     return arr;
 }
 
+fn convert_bool_key(string: &str) -> [bool; 10] {
+    let mut arr: [bool;10]=[false;10];
+    for (i, a) in string.chars().enumerate() {
+        if a == '1' {
+            arr[i] = true;
+        } else {
+            arr[i] = false;
+        }
+    }
+    return arr;
+}
+
+fn convert_string(text:[bool; 8]) ->  [char; 8] {
+    let mut arr: [char; 8] =['0';8];
+    for x in 0..8{
+        if(text[x]==true){
+            arr[x]='1'
+        }else{
+            arr[x]='0'
+        }
+    }
+    return arr;
+}
+
+fn convert_string_key(text:[bool; 10]) ->  [char; 10] {
+    let mut arr: [char; 10] =['0';10];
+    for x in 0..8{
+        if(text[x]==true){
+            arr[x]='1'
+        }else{
+            arr[x]='0'
+        }
+    }
+    return arr;
+}
+
 fn generate_key(key:u32) -> [bool; 10]{
     let mut temp_key: [bool; 10] = [false;10];
     let x = key;
@@ -333,4 +392,18 @@ fn generate_key(key:u32) -> [bool; 10]{
         }
     }
     return temp_key;
+}
+
+
+mod simple_user_input {
+    use std::io;
+    pub fn get_input(prompt: &str) -> String{
+        println!("{}",prompt);
+        let mut input = String::new();
+        match io::stdin().read_line(&mut input) {
+            Ok(_goes_into_input_above) => {},
+            Err(_no_updates_is_fine) => {},
+        }
+        input.trim().to_string()
+    }
 }
