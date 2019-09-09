@@ -35,7 +35,7 @@ fn main() {
                 if(cipher_text == cipher){
                     println!("Llave encontrada");
                     println!("CIPHER - {:?}", cipher_text);
-                    println!("CIPHER - {:?}", i);
+                    println!("Key - {:?}", i);
                 }
             }
         // let handle_threads = thread::spawn(move || {
