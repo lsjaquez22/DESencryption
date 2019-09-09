@@ -13,14 +13,17 @@ fn main() {
     let file = File::open(fine_name).unwrap();
 
     let reader = BufReader::new(file);
+
+    let mut keys = vec![];
     
-    for line in reader.lines() {
+    for (j, line) in reader.lines().enumerate() {
         
-            let mut string = line.unwrap();
-            let v: Vec<&str> = string.split(',').collect();
-            let plain = convert_bool(v[0]);
-            let cipher = convert_bool(v[1]);
-            let mut i=0;
+        let mut string = line.unwrap();
+        let v: Vec<&str> = string.split('/').collect();
+        let plain = convert_bool(v[0]);
+        let cipher = convert_bool(v[1]);
+        let mut i=0;
+        if j == 0 { 
             while i<1024{
                 let ten_bit: [bool; 10] = generate_key(i);
                 let plain_text : [bool;8] = plain;
@@ -32,53 +35,40 @@ fn main() {
                 //encrypt
                 let cipher_text = encrypt(plain_text, first_key,second_key);
                 if(cipher_text == cipher){
+                    keys.push(i);
                     println!("Llave encontrada");
                     println!("PLAIN - {:?}", plain_text);
                     println!("CIPHER - {:?}", cipher_text);
                     println!("Key - {:?}", generate_key(i));
                     println!("Key - {:?}", i);
+                    println!("{}", string);
                     println!("\n");
-                    i=1025;
+                    i=i+1;
                 }
                 i=i+1;
             }
-            // for i in 0..1024{
-            //     let ten_bit: [bool; 10] = generate_key(i);
-            //     let plain_text : [bool;8] = plain;
-            //     let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
-            //     // KEYS
-            //     let mut permute_ten = permute_ten_key(ten_bit);
-            //     let mut first_key = get_first_key(permute_ten.as_mut());
-            //     let mut second_key = get_second_key(permute_ten.as_mut());
-            //     //encrypt
-            //     let cipher_text = encrypt(plain_text, first_key,second_key);
-            //     if(cipher_text == cipher){
-            //         println!("Llave encontrada");
-            //         println!("CIPHER - {:?}", cipher_text);
-            //         println!("Key - {:?}", i);
-            //         break()
-            //     }
-            // }
-        // let handle_threads = thread::spawn(move || {
-        //     // println!("{:?} converts to {:?}", plain, cipher);
-        //     // let ten_bit: [bool; 10] = [true, false, false, true, true, false, false, true, false, false];
-        //     let ten_bit: [bool; 10] = brute_force();
-        //     let plain_text : [bool;8] = plain;
-        //     let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
-        //     // KEYS
-
-        //     let mut permute_ten = permute_ten_key(ten_bit);
-        //     let mut first_key = get_first_key(permute_ten.as_mut());
-        //     let mut second_key = get_second_key(permute_ten.as_mut());
-            
-        //     //encrypt
-        //     let cipher_text = encrypt(plain_text, first_key,second_key);
-        //     println!("CIPHER - {:?}", cipher_text);
-        // });
+        } else {
+            let mut keys_to_remove = vec![];
+            for (i, key) in keys.iter().enumerate() {
+                let ten_bit: [bool; 10] = generate_key(*key);
+                let plain_text : [bool;8] = plain;
+                //let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
+                // KEYS
+                let mut permute_ten = permute_ten_key(ten_bit);
+                let mut first_key = get_first_key(permute_ten.as_mut());
+                let mut second_key = get_second_key(permute_ten.as_mut());
+                //encrypt
+                let cipher_text = encrypt(plain_text, first_key,second_key);
+                if(cipher_text != cipher){
+                    keys_to_remove.push(i);
+                }
+            }
+            for (index, i) in keys_to_remove.iter().enumerate(){
+                keys.remove(*i-index);
+            }
+        }
     }
-
-    
-
+    println!("{:?}", keys);
 }
 
 fn get_first_key(ten_bit: &mut[bool]) -> [bool; 8] {
