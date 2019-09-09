@@ -20,24 +20,45 @@ fn main() {
             let v: Vec<&str> = string.split(',').collect();
             let plain = convert_bool(v[0]);
             let cipher = convert_bool(v[1]);
-            for i in 0..1024{
+            let mut i=0;
+            while i<1024{
                 let ten_bit: [bool; 10] = generate_key(i);
                 let plain_text : [bool;8] = plain;
-                let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
+                //let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
                 // KEYS
-
                 let mut permute_ten = permute_ten_key(ten_bit);
                 let mut first_key = get_first_key(permute_ten.as_mut());
                 let mut second_key = get_second_key(permute_ten.as_mut());
-                    
-                    //encrypt
+                //encrypt
                 let cipher_text = encrypt(plain_text, first_key,second_key);
                 if(cipher_text == cipher){
                     println!("Llave encontrada");
+                    println!("PLAIN - {:?}", plain_text);
                     println!("CIPHER - {:?}", cipher_text);
+                    println!("Key - {:?}", generate_key(i));
                     println!("Key - {:?}", i);
+                    println!("\n");
+                    i=1025;
                 }
+                i=i+1;
             }
+            // for i in 0..1024{
+            //     let ten_bit: [bool; 10] = generate_key(i);
+            //     let plain_text : [bool;8] = plain;
+            //     let cipher : [bool;8]= [false, true, true, true, false, false, false, false];
+            //     // KEYS
+            //     let mut permute_ten = permute_ten_key(ten_bit);
+            //     let mut first_key = get_first_key(permute_ten.as_mut());
+            //     let mut second_key = get_second_key(permute_ten.as_mut());
+            //     //encrypt
+            //     let cipher_text = encrypt(plain_text, first_key,second_key);
+            //     if(cipher_text == cipher){
+            //         println!("Llave encontrada");
+            //         println!("CIPHER - {:?}", cipher_text);
+            //         println!("Key - {:?}", i);
+            //         break()
+            //     }
+            // }
         // let handle_threads = thread::spawn(move || {
         //     // println!("{:?} converts to {:?}", plain, cipher);
         //     // let ten_bit: [bool; 10] = [true, false, false, true, true, false, false, true, false, false];
