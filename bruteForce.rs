@@ -6,37 +6,8 @@ use std::io::prelude::*;
 use std::path::Path;
 use simple_user_input::get_input;
 
-fn main() {
-
-    println!("1 - Encriptar");
-    println!("2 - Desencriptar");
-    println!("3 - Fuerza bruta");
-    let input: String = get_input("Seleccione una opcion...");
-    if(input=="1"){
-        let input_plain_text: String = get_input("Plain text: ");
-        let input_key: String = get_input("Key: ");
-
-        let mut permute_ten = permute_ten_key(convert_bool_key(&input_key));
-        let mut first_key = get_first_key(permute_ten.as_mut());
-        let mut second_key = get_second_key(permute_ten.as_mut());
-        //encrypt
-        let cipher_text = encrypt(convert_bool(&input_plain_text), first_key,second_key);
-        let cipher_text_number: String = convert_string(cipher_text).into_iter().collect();
-        println!("Ciphertext - {}", cipher_text_number);
-
-    }else if(input=="2"){
-        let input_plain_text: String = get_input("Ciphertext: ");
-        let input_key: String = get_input("Key: ");
-
-        let mut permute_ten = permute_ten_key(convert_bool_key(&input_key));
-        let mut first_key = get_first_key(permute_ten.as_mut());
-        let mut second_key = get_second_key(permute_ten.as_mut());
-        //encrypt
-        let cipher_text = encrypt(convert_bool(&input_plain_text),second_key, first_key);
-        let cipher_text_number: String = convert_string(cipher_text).into_iter().collect();
-        println!("Plain text - {}", cipher_text_number);
-    }else if(input=="3"){
-        let fine_name = "plainCipher.txt";
+fn main(){
+    let fine_name = "plainCipher.txt";
 
         // Open the path in read-only mode, returns `io::Result<File>`
         let file = File::open(fine_name).unwrap();
@@ -101,8 +72,6 @@ fn main() {
         let key_number: String = convert_string_key(generate_key(keys[0])).into_iter().collect();
         println!("Key - {}", key_number);
         println!("\n");
-    }
-    //generate_key(keys)
 }
 
 fn get_first_key(ten_bit: &mut[bool]) -> [bool; 8] {
@@ -312,19 +281,19 @@ fn permute_s(second_four_xor: &mut [bool]) -> [bool; 4]{
 fn encrypt(plain_text: [bool;8], first_key:[bool;8], second_key:[bool;8]) -> [bool; 8]{
     let mut permute_ip_plain = permute_i_p(plain_text);
     let permute_ip_plain_string: String = convert_string(permute_ip_plain).into_iter().collect();
-    println!("IP - {}", permute_ip_plain_string);
+    // println!("IP - {}", permute_ip_plain_string);
     let (first_four_plain, second_four_plain) : (&mut[bool], &mut[bool]) = permute_ip_plain.split_at_mut(4);
     let mut function_first_key = fkey(first_four_plain, second_four_plain, first_key);
     let function_first_key_string: String = convert_string_fkey(function_first_key).into_iter().collect();
-    println!("fKey1 - {}", function_first_key_string);
+    // println!("fKey1 - {}", function_first_key_string);
     // ROUND 2
     let sw: String = convert_vect_string_eigth([second_four_plain.as_mut(), function_first_key.as_mut()].concat()).into_iter().collect();
-    println!("SW - {}", sw);
+    // println!("SW - {}", sw);
     let mut function_second_key = fkey(second_four_plain, function_first_key.as_mut(), second_key);
     let function_sec_key_string: String = convert_string_fkey(function_second_key).into_iter().collect();
-    println!("fKey2 - {}", function_sec_key_string);
+    // println!("fKey2 - {}", function_sec_key_string);
     let pre_ip_1: String = convert_vect_string_eigth([function_second_key.as_mut(), function_first_key.as_mut()].concat()).into_iter().collect();
-    println!("pre_ip_1 - {}", pre_ip_1);
+    // println!("pre_ip_1 - {}", pre_ip_1);
     let cipher = permute_i_p_1([function_second_key.as_mut(), function_first_key.as_mut()].concat());
     return cipher;
 }
